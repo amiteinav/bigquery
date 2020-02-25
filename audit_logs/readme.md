@@ -88,23 +88,28 @@ bq query \
 ```
 
 ## Copying the data source in Data Studio
-Log in to Data Studio and create a copy of this[1] data source. Click here[2] for more information on copying data sources.
+* Log in to Data Studio and create a copy of this[1] data source.
+* Click here[2] for more information on copying data sources.
+
 [1] https://datastudio.google.com/u/2/datasources/10MfID78E_Dyw_n9Cc6gDGUuGyRHrN6dh
 [2] https://support.google.com/datastudio/answer/7421646?hl=en&ref_topic=6370331
 
-There are three derived fields need to be defined in the datasource.
+* There are three derived fields need to be defined in the datasource.
+  * totalCached: SUM(numCached);
+  * pctCached: totalCached / COUNT(isCached);
+  * table: CONCAT(referencedTables.projectId, '.',referencedTables.datasetId,'.',referencedTables.tableId);
 
-totalCached: SUM(numCached);
-pctCached: totalCached / COUNT(isCached);
-table: CONCAT(referencedTables.projectId, '.',referencedTables.datasetId,'.',referencedTables.tableId);
-Rename the data source to a name of your choice. Click on "Edit Connection" to navigate to the project, dataset and table of your choice. It should correspond to the materialized table created as a result of step 2 above.
+* Rename the data source to a name of your choice. 
+* Click on "Edit Connection" to navigate to the project, dataset and table of your choice. 
+* It should correspond to the materialized table created as a result of step 2 above.
 
-Click on "Reconnect" located on the top right of the page.
+* Click on "Reconnect" located on the top right of the page.
 
 ## Creating a dashboard in Data Studio
-Create a copy of this[1] Dashboard.
-After clicking on the Copy button, you will find a message asking you to choose a new data source. Select the data source created in the step 3 above.
-Click on create report. Rename the report (dashboard) to a name of your choice.
+* Create a copy of this[1] Dashboard.
+* After clicking on the Copy button, you will find a message asking you to choose a new data source. 
+* Select the data source created in the step above called "Copying the data source in Data Studio"
+* Click on create report. Rename the report (dashboard) to a name of your choice.
 
 [1] https://datastudio.google.com/u/2/reporting/1kwNFt05J8_GCju5TBH1v4IlBmmAU74Nu/page/nSaN
 
