@@ -12,7 +12,11 @@
 * https://github.com/GoogleCloudPlatform/professional-services/tree/master/examples/bigquery-audit-log
 
 ## Setting it up
-
+* Download the repo
+```
+git clone https://github.com/amiteinav/bigquery-public.git
+cd bigquery-public/audit_logs
+```
 * Choose where to place the logs
 ```
 export sink=bigquery_audit
@@ -70,12 +74,39 @@ bq update --source policy.yaml ${project}:${auditlog_dataset}
 
 * Run the following command to schedule the query to run every 15 minutes
 ```
-query=`cat bigquery_audit_log.sql`
+PWD=`pwd`
+sqlfile=${PWD}/bigquery_audit_log.sql
+sed  -i 's/DATASET_NAME/'${auditlog_dataset}'/g'  $sqlfile
+
 bq query \
     --use_legacy_sql=false \
     --destination_table=${auditlog_dataset}.${auditlog_table} \
-    --display_name='BigQuery Usage Scheduled Query' \
+    --display_name='BQ-usage-scheduled-query' \
+    --schedule='every 15 minutes' \
     --replace=true \
-    '`echo $query`'
+    --flagfile=$sqlfile
 ```
+
+## Copying the data source in Data Studio
+Log in to Data Studio and create a copy of this[1] data source. Click here[2] for more information on copying data sources.
+[1] https://datastudio.google.com/u/2/datasources/10MfID78E_Dyw_n9Cc6gDGUuGyRHrN6dh
+[2] https://support.google.com/datastudio/answer/7421646?hl=en&ref_topic=6370331
+
+There are three derived fields need to be defined in the datasource.
+
+totalCached: SUM(numCached);
+pctCached: totalCached / COUNT(isCached);
+table: CONCAT(referencedTables.projectId, '.',referencedTables.datasetId,'.',referencedTables.tableId);
+Rename the data source to a name of your choice. Click on "Edit Connection" to navigate to the project, dataset and table of your choice. It should correspond to the materialized table created as a result of step 2 above.
+
+Click on "Reconnect" located on the top right of the page.
+
+## Creating a dashboard in Data Studio
+Create a copy of this[1] Dashboard.
+After clicking on the Copy button, you will find a message asking you to choose a new data source. Select the data source created in the step 3 above.
+Click on create report. Rename the report (dashboard) to a name of your choice.
+
+[1] https://datastudio.google.com/u/2/reporting/1kwNFt05J8_GCju5TBH1v4IlBmmAU74Nu/page/nSaN
+
+ 
 
