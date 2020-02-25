@@ -1,12 +1,3 @@
-
-    
-/*
- * Script: BQ Audit
- * Author: ryanmcdowell, freedomofnet, mihirborkar
- * Description:
- * This SQL Script creates a materialized source table acting as input to the Dashboard.
- */
-
 WITH BQAudit AS (
   SELECT
     protopayload_auditlog.authenticationInfo.principalEmail,
@@ -58,7 +49,7 @@ WITH BQAudit AS (
     protopayload_auditlog.servicedata_v1_bigquery.jobCompletedEvent.job.jobStatistics.referencedViews
     /* This ends the code snippet that extracts columns specific to Query operation in BQ */
   FROM
-    `PROJECT_NAME.DATASET_NAME.cloudaudit_googleapis_com_data_access_*`
+    `DATASET_NAME.cloudaudit_googleapis_com_data_access_*`
   WHERE
     protopayload_auditlog.serviceName = 'bigquery.googleapis.com'
     AND protopayload_auditlog.methodName = 'jobservice.jobcompleted'
@@ -101,15 +92,15 @@ SELECT
   runtimeMs,
   runtimeSecs,
   tableCopy, /* This code queries data specific to the Copy operation */
-  #CONCAT(tableCopy.destinationTable.datasetId, '.', tableCopy.destinationTable.tableId) AS tableCopyDestinationTableRelativePath,
-  CONCAT(tableCopy.destinationTable.datasetId, '.', tableCopy.destinationTable.tableId) AS tableCopy_destinationTable_relativePath,
-  #CONCAT(tableCopy.destinationTable.projectId, '.', tableCopy.destinationTable.datasetId, '.', tableCopy.destinationTable.tableId) AS tableCopyDestinationTableAbsolutePath,
-  CONCAT(tableCopy.destinationTable.projectId, '.', tableCopy.destinationTable.datasetId, '.', tableCopy.destinationTable.tableId) AS tableCopy_destinationTable_absolutePath,
+  CONCAT(tableCopy.destinationTable.datasetId, '.', tableCopy.destinationTable.tableId)
+    AS tableCopyDestinationTableRelativePath,
+  CONCAT(tableCopy.destinationTable.projectId, '.', tableCopy.destinationTable.datasetId, '.',
+    tableCopy.destinationTable.tableId) AS tableCopyDestinationTableAbsolutePath,
   IF(eventName = 'table_copy_job_completed', 1, 0) AS numCopies, /* This code queries data specific to the Copy operation */
   /* The following code queries data specific to the Load operation in BQ */
   totalLoadOutputBytes,
-  (totalLoadOutputBytes / 1000000000) AS totalLoadOutputGigabytes,
-  (totalLoadOutputBytes / 1000000000) / 1000 AS totalLoadOutputTerabytes,
+  (totalLoadOutputBytes / pow(2,30)) AS totalLoadOutputGigabytes,
+  (totalLoadOutputBytes / pow(2,40)) AS totalLoadOutputTerabytes,
   STRUCT(
     load.sourceUris,
     STRUCT(
@@ -169,19 +160,17 @@ SELECT
   totalViewsProcessed,
   totalProcessedBytes,
   totalBilledBytes,
-  (totalBilledBytes / 1000000000) AS totalBilledGigabytes,
-  (totalBilledBytes / 1000000000) / 1000 AS totalBilledTerabytes,
-  ((totalBilledBytes / 1000000000) / 1000) * 5 AS estimatedCostUsd,
+  (totalBilledBytes / pow(2,30)) AS totalBilledGigabytes,
+  (totalBilledBytes / pow(2,40)) AS totalBilledTerabytes,
+  (totalBilledBytes / pow(2,40)) * 5 AS estimatedCostUsd,
   billingTier,
   query,
-  #CONCAT(query.destinationTable.datasetId, '.', query.destinationTable.tableId) AS queryDestinationTableRelativePath,
-  CONCAT(query.destinationTable.datasetId, '.', query.destinationTable.tableId) AS query_destinationTable_relativePath,
-  #CONCAT(query.destinationTable.projectId, '.', query.destinationTable.datasetId, '.', query.destinationTable.tableId) AS queryDestinationTableAbsolutePath,
-  CONCAT(query.destinationTable.projectId, '.', query.destinationTable.datasetId, '.', query.destinationTable.tableId) AS query_destinationTable_absolutePath,
+  CONCAT(query.destinationTable.datasetId, '.', query.destinationTable.tableId) AS queryDestinationTableRelativePath,
+  CONCAT(query.destinationTable.projectId, '.', query.destinationTable.datasetId, '.',
+    query.destinationTable.tableId) AS queryDestinationTableAbsolutePath,
   referencedTables,
   referencedViews,
   IF(eventName = 'query_job_completed', 1, 0) AS queries
   /* This ends the code snippet that queries columns specific to the Query operation in BQ */
 FROM
   BQAudit
-
