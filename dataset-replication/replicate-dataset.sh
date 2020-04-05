@@ -19,7 +19,8 @@ while getopts ":p:d:t:e:" opt; do
 done
 
 if [[ "${SOURCE_PROJECT_ID}" == "" || "${TARGET_PROJECT_ID}" == "" || "${SOURCE_DATASET}" == "" || "${TARGET_DATASET}" == ""  ]] ; then
-    echo "[ ERROR $0 ] Missing parameter"
+    echo "[ ERROR  $0 ] Missing parameter"
+    echo "[ INFO   $0 ] $0 -p SOURCE_PROJECT_ID -d SOURCE_DATASET -t TARGET_PROJECT_ID -e TARGET_DATASET"
     exit 1
 fi
 
