@@ -92,6 +92,7 @@ bq query \
 * Click here[2] for more information on copying data sources.
 
 [1] https://datastudio.google.com/u/2/datasources/10MfID78E_Dyw_n9Cc6gDGUuGyRHrN6dh
+
 [2] https://support.google.com/datastudio/answer/7421646?hl=en&ref_topic=6370331
 
 * There are three derived fields need to be defined in the datasource.
