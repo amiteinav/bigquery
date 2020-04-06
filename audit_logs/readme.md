@@ -1,23 +1,23 @@
-# BigQuery Audit Logs
+# Visualizing BigQuery Audit Logs
 
 ## Overview
 * Cloud Audit Logs are a collection of logs provided by Google Cloud Platform that provide insight into operational concerns related to your use of Google Cloud services. Here are details about BigQuery specific log information
 
 * Here you will find details on 
   * Setting audit logs stream into BigQuery
-  * Querying the information wither by using queries or datastudio
+  * Querying the information by using queries or datastudio
 
 ## Reference
 * https://cloud.google.com/bigquery/docs/reference/auditlogs/
 * https://github.com/GoogleCloudPlatform/professional-services/tree/master/examples/bigquery-audit-log
 
-## Setting it up
-* Download the repo
+## Setting up Audit Logs stream into BigQuery
+* Download this repo
 ```
 git clone https://github.com/amiteinav/bigquery-public.git
 cd bigquery-public/audit_logs
 ```
-* Choose where to place the logs
+* Set a location (project, dataset and location) to place the logs
 ```
 export sink=bigquery_audit
 export project=`gcloud config get-value project`
@@ -29,12 +29,12 @@ export location=US
 ```
 bq ls -d ${project}: | grep -w ${auditlog_dataset}
 ```
-* Create the dataset 
+* Create the dataset if it does not exist 
 ```
 bq mk --location $location \
 --dataset ${project}:${auditlog_dataset} 
 ```
-* Create a sink for the entire BigQuery logging
+* Create a sink for the *entire* BigQuery logging
 ```
 gcloud logging sinks create $sink \
  bigquery.googleapis.com/projects/${project}/datasets/${auditlog_dataset} \
