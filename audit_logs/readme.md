@@ -34,7 +34,7 @@ bq ls -d ${project}: | grep -w ${auditlog_dataset}
 bq mk --location $location \
 --dataset ${project}:${auditlog_dataset} 
 ```
-* Create a sink for the *entire* BigQuery logging
+* Create a sink for the **entire** BigQuery logging of this project
 ```
 gcloud logging sinks create $sink \
  bigquery.googleapis.com/projects/${project}/datasets/${auditlog_dataset} \
@@ -55,18 +55,18 @@ echo $service_account
 ```
 bq show --format=prettyjson ${project}:${auditlog_dataset} > policy.yaml
 ```
-* Add a row like this in the policy.yaml file and make sure to replace ${service_account} with the service account
+* Add a row like here in the *policy.yaml* file and make sure to replace SERVICE_ACCOUNT with the service account
 ```
     {
       "role": "WRITER", 
-      "userByEmail": "${service_account}"
+      "userByEmail": "SERVICE_ACCOUNT"
     },
 ```
 * Apply the new policy file
 ```
 bq update --source policy.yaml ${project}:${auditlog_dataset}
 ```
-* From this point on there should be audit logs flowing. two tablbes 
+* From this point on there should be audit logs flowing into two tablbes 
   * cloudaudit_googleapis_com_activity_YYYYMMDD
   * cloudaudit_googleapis_com_data_access_YYYYMMDD
 
@@ -89,13 +89,13 @@ bq query \
 
 ## Copying the data source in Data Studio
 * Log in to Data Studio and create a copy of this[1] data source.
-* Click here[2] for more information on copying data sources.
+* Here[2] is for more information on copying data sources.
 
 [1] https://datastudio.google.com/u/2/datasources/10MfID78E_Dyw_n9Cc6gDGUuGyRHrN6dh
 
 [2] https://support.google.com/datastudio/answer/7421646?hl=en&ref_topic=6370331
 
-* There are three derived fields need to be defined in the datasource.
+* There are three derived fields that need to be defined in the datasource.
   * totalCached: SUM(numCached);
   * pctCached: totalCached / COUNT(isCached);
   * table: CONCAT(referencedTables.projectId, '.',referencedTables.datasetId,'.',referencedTables.tableId);
