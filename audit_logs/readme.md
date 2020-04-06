@@ -36,7 +36,7 @@ bq mk --location $location \
 ```
 * Create a sink for the **entire** BigQuery logging of this project
 ```
-gcloud logging sinks create $sink \
+gcloud logging sinks create $sink --project ${project} \
  bigquery.googleapis.com/projects/${project}/datasets/${auditlog_dataset} \
   --log-filter='resource.type="bigquery_resource"'
 ```
@@ -48,19 +48,16 @@ gcloud logging sinks create $sink \
 ```
 * Get the service account for the sink
 ```
-service_account=`gcloud logging sinks describe $sink --format="value(writerIdentity)"`
+service_account=`gcloud logging sinks describe $sink  --project $project --format="value(writerIdentity)"`
 echo $service_account
 ```
 * Get the current permissions to the dataset
 ```
 bq show --format=prettyjson ${project}:${auditlog_dataset} > policy.yaml
 ```
-* Add a row like here in the *policy.yaml* file and make sure to replace SERVICE_ACCOUNT with the service account
+* Add a row like here in the *policy.yaml* file and make sure to replace SERVICE_ACCOUNT with the service account email (example: p489370125521-773216@gcp-sa-logging.iam.gserviceaccount.com)
 ```
-    {
-      "role": "WRITER", 
-      "userByEmail": "SERVICE_ACCOUNT"
-    },
+   printf " { "role": "WRITER", "userByEmail": "$service_account" }, \n"
 ```
 * Apply the new policy file
 ```
@@ -75,10 +72,12 @@ bq update --source policy.yaml ${project}:${auditlog_dataset}
 * Run the following command to schedule the query to run every 15 minutes
 ```
 PWD=`pwd`
-sqlfile=${PWD}/bigquery_audit_log.sql
+sqlfile=${PWD}/bigquery_audit_log.sql.$$
+cp ${PWD}/bigquery_audit_log.sql $sqlfile
 sed  -i 's/DATASET_NAME/'${auditlog_dataset}'/g'  $sqlfile
 
 bq query \
+    --project_id=$project \
     --use_legacy_sql=false \
     --destination_table=${auditlog_dataset}.${auditlog_table} \
     --display_name='BQ-usage-scheduled-query' \
@@ -95,11 +94,6 @@ bq query \
 
 [2] https://support.google.com/datastudio/answer/7421646?hl=en&ref_topic=6370331
 
-* There are three derived fields that need to be defined in the datasource.
-  * totalCached: SUM(numCached);
-  * pctCached: totalCached / COUNT(isCached);
-  * table: CONCAT(referencedTables.projectId, '.',referencedTables.datasetId,'.',referencedTables.tableId);
-
 * Rename the data source to a name of your choice. 
 * Click on "Edit Connection" to navigate to the project, dataset and table of your choice. 
 * It should correspond to the materialized table created as a result of step 2 above.
@@ -113,6 +107,3 @@ bq query \
 * Click on create report. Rename the report (dashboard) to a name of your choice.
 
 [1] https://datastudio.google.com/u/2/reporting/1kwNFt05J8_GCju5TBH1v4IlBmmAU74Nu/page/nSaN
-
- 
-
