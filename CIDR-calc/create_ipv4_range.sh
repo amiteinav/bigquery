@@ -2,10 +2,7 @@
 
 #IP to Integer IP formula: #192(256)^3 + 168(256)^2 + 0(256)^1 + 1			
 
-if [ "$1" != "" ] ; then
 i=$1
-
-for i in {0..255} ; do
     for j in {0..255} ; do
         for k in {0..255} ; do
             for l in {0..255} ; do
@@ -13,7 +10,6 @@ for i in {0..255} ; do
             done
         done
     done
-done
 
 
 
