@@ -48,16 +48,15 @@ gcloud logging sinks create $sink \
 ```
 * Get the service account for the sink
 ```
-service_account=`gcloud logging sinks describe $sink  --project $project --format="value(writerIdentity)"`
-echo $service_account
+service_account=`gcloud logging sinks describe $sink  --project $project --format="value(writerIdentity)" | awk -F":" '{print $2}'`
 ```
 * Get the current permissions to the dataset
 ```
 bq show --format=prettyjson ${project}:${auditlog_dataset} > policy.yaml
 ```
-* Add a row like here in the *policy.yaml* file and make sure to replace SERVICE_ACCOUNT with the service account email (example: p489370125521-773216@gcp-sa-logging.iam.gserviceaccount.com)
+* Add the row created by the *printf* command in the *policy.yaml* file . The location of new line should be right after the **{ "role": "WRITER",      "specialGroup": "projectWriters" },** part
 ```
-   printf " { "role": "WRITER", "userByEmail": "$service_account" }, \n"
+   printf " { \"role\": \"WRITER\", \"userByEmail\": \"$service_account\" }, \n"
 ```
 * Apply the new policy file
 ```
